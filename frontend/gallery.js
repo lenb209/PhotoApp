@@ -4,21 +4,26 @@ class Dashboard {
     constructor() {
         this.apiBaseUrl = 'http://localhost:3000/api';
         this.currentMedia = null;
-        this.currentUser = {
-            id: 'user123',
-            username: 'john_photographer',
-            firstName: 'John',
-            lastName: 'Photographer',
-            email: 'john@example.com'
-        };
+        this.currentUser = null;
+        this.isAuthenticated = false;
         this.currentSection = 'feed';
         this.feedData = [];
         this.followingData = [];
         this.init();
     }
 
-    init() {
+    async init() {
+        // Check authentication first
+        await this.checkAuthStatus();
+        
+        if (!this.isAuthenticated) {
+            // Redirect to login if not authenticated
+            window.location.href = 'index.html';
+            return;
+        }
+        
         this.bindEvents();
+        this.updateUserProfile();
         this.loadFeedData();
         this.loadFollowingData();
         this.showSection('feed');
@@ -718,6 +723,80 @@ class Dashboard {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // Authentication Methods
+    async checkAuthStatus() {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/auth/status`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            
+            if (data.authenticated) {
+                this.currentUser = data.user;
+                this.isAuthenticated = true;
+                return true;
+            } else {
+                this.isAuthenticated = false;
+                return false;
+            }
+        } catch (error) {
+            console.error('Error checking auth status:', error);
+            this.isAuthenticated = false;
+            return false;
+        }
+    }
+
+    updateUserProfile() {
+        if (!this.currentUser) return;
+
+        // Update profile section with user data
+        const profileUsername = document.getElementById('profileUsername');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileDisplayName = document.getElementById('profileDisplayName');
+        const profileBio = document.getElementById('profileBio');
+
+        if (profileUsername) profileUsername.textContent = this.currentUser.username;
+        if (profileEmail) profileEmail.textContent = this.currentUser.email;
+        if (profileDisplayName) profileDisplayName.value = this.currentUser.displayName || '';
+        if (profileBio) profileBio.value = this.currentUser.bio || '';
+
+        // Update header with user info
+        const userAvatar = document.querySelector('.user-avatar');
+        const userName = document.querySelector('.user-name');
+        
+        if (userName) userName.textContent = this.currentUser.displayName || this.currentUser.username;
+        if (userAvatar && this.currentUser.profileImage) {
+            userAvatar.src = this.currentUser.profileImage;
+        }
+    }
+
+    async handleLogout() {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/auth/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                this.currentUser = null;
+                this.isAuthenticated = false;
+                this.showToast('Logged out successfully', 'success');
+                
+                // Redirect to homepage
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } else {
+                this.showToast('Logout failed', 'error');
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            this.showToast('Logout failed', 'error');
+        }
     }
 
     // Check server status

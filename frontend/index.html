@@ -14,7 +14,13 @@
             <h1 class="logo">📸 The Photography Club</h1>
             <nav class="nav">
                 <a href="gallery.html" class="btn-secondary">View Gallery</a>
-                <button id="loginBtn" class="btn-primary">Login</button>
+                <div id="authButtons" class="auth-buttons">
+                    <button id="loginBtn" class="btn-primary">Login</button>
+                </div>
+                <div id="userMenu" class="user-menu hidden">
+                    <span id="welcomeUser" class="welcome-text"></span>
+                    <button id="logoutBtn" class="btn-secondary">Logout</button>
+                </div>
             </nav>
         </div>
     </header>
@@ -61,18 +67,13 @@
                         <form id="signUpForm" class="signup-form">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="firstName">First Name</label>
-                                    <input type="text" id="firstName" name="firstName" required>
+                                    <label for="displayName">Display Name</label>
+                                    <input type="text" id="displayName" name="displayName" placeholder="Your display name" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="lastName">Last Name</label>
-                                    <input type="text" id="lastName" name="lastName" required>
+                                    <label for="username">Username</label>
+                                    <input type="text" id="username" name="username" placeholder="Choose a unique username" required>
                                 </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="username">Username</label>
-                                <input type="text" id="username" name="username" placeholder="Choose a unique username" required>
                             </div>
                             
                             <div class="form-group">
@@ -82,7 +83,7 @@
                             
                             <div class="form-group">
                                 <label for="password">Password</label>
-                                <input type="password" id="password" name="password" placeholder="At least 8 characters" required>
+                                <input type="password" id="password" name="password" placeholder="At least 6 characters" required>
                             </div>
                             
                             <div class="form-group checkbox-group">
@@ -125,6 +126,38 @@
             </section>
         </div>
     </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal hidden">
+        <div class="modal-overlay" id="loginModalOverlay"></div>
+        <div class="modal-content login-modal-content">
+            <button class="modal-close" id="loginModalClose">&times;</button>
+            <div class="modal-body">
+                <div class="login-form-container">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to your PhotoShare account</p>
+                    
+                    <form id="loginForm" class="login-form">
+                        <div class="form-group">
+                            <label for="loginUsername">Username</label>
+                            <input type="text" id="loginUsername" name="username" placeholder="Your username" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" name="password" placeholder="Your password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary btn-large">Sign In</button>
+                    </form>
+                    
+                    <div class="login-footer">
+                        <p>Don't have an account? <a href="#" class="link" id="signUpLink">Create one</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Photo Modal -->
     <div id="photoModal" class="modal hidden">

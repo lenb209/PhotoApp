@@ -55,15 +55,25 @@ function initializeTables() {
           console.error('Error adding featuredStream column:', err);
         }
       });
+      
+      db.run(`ALTER TABLE photos ADD COLUMN userId TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding userId column:', err);
+        }
+      });
     }
   });
 
-  // Users table (for future enhancement)
+  // Users table with authentication
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       username TEXT UNIQUE NOT NULL,
       email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      displayName TEXT,
+      bio TEXT,
+      profileImage TEXT,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `, (err) => {
@@ -71,6 +81,46 @@ function initializeTables() {
       console.error('Error creating users table:', err);
     } else {
       console.log('✅ Users table ready');
+      
+      // Add new authentication columns if they don't exist (migration)
+      db.run(`ALTER TABLE users ADD COLUMN password TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding password column:', err);
+        }
+      });
+      
+      db.run(`ALTER TABLE users ADD COLUMN displayName TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding displayName column:', err);
+        }
+      });
+      
+      db.run(`ALTER TABLE users ADD COLUMN bio TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding bio column:', err);
+        }
+      });
+      
+      db.run(`ALTER TABLE users ADD COLUMN profileImage TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding profileImage column:', err);
+        }
+      });
+    }
+  });
+
+  // Sessions table for authentication
+  db.run(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      sid TEXT PRIMARY KEY,
+      sess TEXT NOT NULL,
+      expire DATETIME NOT NULL
+    )
+  `, (err) => {
+    if (err) {
+      console.error('Error creating sessions table:', err);
+    } else {
+      console.log('✅ Sessions table ready');
     }
   });
 
@@ -251,7 +301,7 @@ const userOperations = {
   getUserById: (id) => {
     return new Promise((resolve, reject) => {
       db.get(`
-        SELECT id, username, email, createdAt 
+        SELECT id, username, email, displayName, bio, profileImage, createdAt 
         FROM users 
         WHERE id = ?
       `, [id], (err, row) => {
@@ -261,14 +311,59 @@ const userOperations = {
     });
   },
 
-  // Create user
+  // Create user with authentication
   createUser: (userData) => {
     return new Promise((resolve, reject) => {
-      const { id, username, email } = userData;
+      const { id, username, email, password, displayName } = userData;
       db.run(`
-        INSERT INTO users (id, username, email) 
-        VALUES (?, ?, ?)
-      `, [id, username, email], function(err) {
+        INSERT INTO users (id, username, email, password, displayName) 
+        VALUES (?, ?, ?, ?, ?)
+      `, [id, username, email, password, displayName], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          userOperations.getUserById(id)
+            .then(resolve)
+            .catch(reject);
+        }
+      });
+    });
+  },
+
+  // Get user by username (for login)
+  getUserByUsername: (username) => {
+    return new Promise((resolve, reject) => {
+      db.get(`
+        SELECT * FROM users 
+        WHERE username = ?
+      `, [username], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+  },
+
+  // Get user by email
+  getUserByEmail: (email) => {
+    return new Promise((resolve, reject) => {
+      db.get(`
+        SELECT * FROM users 
+        WHERE email = ?
+      `, [email], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+  },
+
+  // Update user profile
+  updateUserProfile: (id, displayName, bio, profileImage) => {
+    return new Promise((resolve, reject) => {
+      db.run(`
+        UPDATE users 
+        SET displayName = ?, bio = ?, profileImage = ?
+        WHERE id = ?
+      `, [displayName, bio, profileImage, id], function(err) {
         if (err) {
           reject(err);
         } else {

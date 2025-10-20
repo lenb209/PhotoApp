@@ -1107,3 +1107,120 @@ input[type="text"]:focus, textarea:focus, input[type="email"]:focus, input[type=
         margin-bottom: 1rem;
     }
 }
+
+/* Authentication Styles */
+.auth-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.welcome-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Login Modal Styles */
+.login-modal-content {
+    max-width: 400px;
+    width: 90%;
+}
+
+.login-form-container {
+    text-align: center;
+    padding: 2rem;
+}
+
+.login-form-container h2 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.login-form-container p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.login-form .form-group {
+    text-align: left;
+}
+
+.login-form .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.login-form .form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-form .form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(26, 77, 58, 0.1);
+}
+
+.login-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.login-footer p {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.login-footer .link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-footer .link:hover {
+    text-decoration: underline;
+}
+
+/* Auth Button Styles */
+.btn-primary:disabled,
+.btn-secondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Form validation styles */
+.form-group input.error {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.form-error {
+    color: var(--error-color);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}

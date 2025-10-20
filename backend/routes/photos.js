@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../database/db');
+const { requireAuth, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -47,8 +48,8 @@ router.get('/featured', async (req, res) => {
   }
 });
 
-// POST /api/photos - Upload a new photo
-router.post('/', upload.single('photo'), async (req, res) => {
+// POST /api/photos - Upload a new photo (requires authentication)
+router.post('/', requireAuth, upload.single('photo'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No photo file provided' });
@@ -101,7 +102,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
       })
       .toFile(thumbnailPath);
 
-    // Save photo info to database
+    // Save photo info to database with user association
     const photoData = {
       id: photoId,
       title: title || originalName,
@@ -113,7 +114,8 @@ router.post('/', upload.single('photo'), async (req, res) => {
       originalName: originalName,
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
-      uploadDate: new Date().toISOString()
+      uploadDate: new Date().toISOString(),
+      userId: req.session.userId // Associate photo with the authenticated user
     };
 
     const savedPhoto = await db.createPhoto(photoData);
@@ -139,12 +141,17 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/photos/:id - Delete a photo
-router.delete('/:id', async (req, res) => {
+// DELETE /api/photos/:id - Delete a photo (requires authentication)
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const photo = await db.getPhotoById(req.params.id);
     if (!photo) {
       return res.status(404).json({ error: 'Photo not found' });
+    }
+
+    // Check if the user owns this photo
+    if (photo.userId !== req.session.userId) {
+      return res.status(403).json({ error: 'You can only delete your own photos' });
     }
 
     // Delete physical files

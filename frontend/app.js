@@ -6,11 +6,14 @@ class PhotoShareLanding {
         this.currentPhoto = null;
         this.streamPhotos = [];
         this.displayedPhotos = 6; // Start with 6 photos
+        this.currentUser = null;
+        this.isAuthenticated = false;
         this.init();
     }
 
     init() {
         this.bindEvents();
+        this.checkAuthStatus();
         this.loadStreamingFeed();
         this.updatePhotoStats();
     }
@@ -27,6 +30,16 @@ class PhotoShareLanding {
             this.handleSignUp(e);
         });
 
+        // Login form
+        document.getElementById('loginForm')?.addEventListener('submit', (e) => {
+            this.handleLogin(e);
+        });
+
+        // Logout button
+        document.getElementById('logoutBtn')?.addEventListener('click', () => {
+            this.handleLogout();
+        });
+
         // Load more photos
         document.getElementById('loadMoreBtn')?.addEventListener('click', () => {
             this.loadMorePhotos();
@@ -35,7 +48,15 @@ class PhotoShareLanding {
         // Sign in link
         document.getElementById('signInLink')?.addEventListener('click', (e) => {
             e.preventDefault();
-            this.showSignInModal();
+            this.closeLoginModal();
+            this.showLoginModal();
+        });
+
+        // Sign up link
+        document.getElementById('signUpLink')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.closeLoginModal();
+            document.getElementById('signUpSection').scrollIntoView({ behavior: 'smooth' });
         });
 
         // Modal events for photo viewing
@@ -45,6 +66,15 @@ class PhotoShareLanding {
 
         document.getElementById('modalOverlay')?.addEventListener('click', () => {
             this.closeModal();
+        });
+
+        // Login modal events
+        document.getElementById('loginModalClose')?.addEventListener('click', () => {
+            this.closeLoginModal();
+        });
+
+        document.getElementById('loginModalOverlay')?.addEventListener('click', () => {
+            this.closeLoginModal();
         });
 
         // Keyboard events
@@ -731,6 +761,178 @@ class PhotoShareLanding {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // Authentication Methods
+    async checkAuthStatus() {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/auth/status`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            
+            if (data.authenticated) {
+                this.currentUser = data.user;
+                this.isAuthenticated = true;
+                this.updateUserInterface();
+            } else {
+                this.isAuthenticated = false;
+                this.updateUserInterface();
+            }
+        } catch (error) {
+            console.error('Error checking auth status:', error);
+            this.isAuthenticated = false;
+            this.updateUserInterface();
+        }
+    }
+
+    updateUserInterface() {
+        const authButtons = document.getElementById('authButtons');
+        const userMenu = document.getElementById('userMenu');
+        const welcomeUser = document.getElementById('welcomeUser');
+
+        if (this.isAuthenticated && this.currentUser) {
+            authButtons.classList.add('hidden');
+            userMenu.classList.remove('hidden');
+            welcomeUser.textContent = `Welcome, ${this.currentUser.displayName || this.currentUser.username}!`;
+        } else {
+            authButtons.classList.remove('hidden');
+            userMenu.classList.add('hidden');
+        }
+    }
+
+    async handleSignUp(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        const userData = {
+            username: formData.get('username'),
+            email: formData.get('email'),
+            password: formData.get('password'),
+            displayName: formData.get('displayName')
+        };
+
+        try {
+            this.showLoading(true);
+            
+            const response = await fetch(`${this.apiBaseUrl}/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(userData)
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                this.currentUser = result.user;
+                this.isAuthenticated = true;
+                this.updateUserInterface();
+                this.showToast('Account created successfully! Welcome to PhotoShare!', 'success');
+                form.reset();
+                
+                // Scroll to gallery or redirect
+                setTimeout(() => {
+                    window.location.href = 'gallery.html';
+                }, 1500);
+            } else {
+                this.showToast(result.message || 'Registration failed', 'error');
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            this.showToast('Registration failed. Please try again.', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    async handleLogin(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        const loginData = {
+            username: formData.get('username'),
+            password: formData.get('password')
+        };
+
+        try {
+            this.showLoading(true);
+            
+            const response = await fetch(`${this.apiBaseUrl}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(loginData)
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                this.currentUser = result.user;
+                this.isAuthenticated = true;
+                this.updateUserInterface();
+                this.closeLoginModal();
+                this.showToast(`Welcome back, ${result.user.displayName || result.user.username}!`, 'success');
+                form.reset();
+                
+                // Redirect to gallery
+                setTimeout(() => {
+                    window.location.href = 'gallery.html';
+                }, 1500);
+            } else {
+                this.showToast(result.message || 'Login failed', 'error');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            this.showToast('Login failed. Please try again.', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    async handleLogout() {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/auth/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                this.currentUser = null;
+                this.isAuthenticated = false;
+                this.updateUserInterface();
+                this.showToast('Logged out successfully', 'success');
+            } else {
+                this.showToast('Logout failed', 'error');
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            this.showToast('Logout failed', 'error');
+        }
+    }
+
+    showLoginModal() {
+        const modal = document.getElementById('loginModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    closeLoginModal() {
+        const modal = document.getElementById('loginModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
     }
 
     // Check server status

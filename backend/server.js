@@ -2,13 +2,34 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Session configuration
+app.use(session({
+  store: new SQLiteStore({
+    db: 'sessions.db',
+    dir: path.join(__dirname, '../data')
+  }),
+  secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // Set to true in production with HTTPS
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -23,6 +44,7 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Routes
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/photos', require('./routes/photos'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/likes', require('./routes/likes'));
