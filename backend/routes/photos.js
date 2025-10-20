@@ -65,22 +65,40 @@ router.post('/', upload.single('photo'), async (req, res) => {
     const photoPath = path.join(__dirname, '../../uploads', filename);
     const thumbnailPath = path.join(__dirname, '../../uploads', thumbnailFilename);
 
-    // Process and save original image (resize if too large)
+    // Validate image dimensions (2048px max on long edge)
+    const imageMetadata = await sharp(req.file.buffer).metadata();
+    const maxDimension = Math.max(imageMetadata.width, imageMetadata.height);
+    
+    if (maxDimension > 2048) {
+      return res.status(400).json({ 
+        error: `Image too large. Maximum dimension is 2048px, but your image is ${maxDimension}px. Please resize your image before uploading.` 
+      });
+    }
+
+    // Validate DPI if available (should be 72 DPI or less for web)
+    if (imageMetadata.density && imageMetadata.density > 72) {
+      return res.status(400).json({ 
+        error: `Image DPI too high. Please save your image at 72 DPI or lower for web use. Current: ${imageMetadata.density} DPI` 
+      });
+    }
+
+    // Save original image without resizing (user must upload correct size)
     await sharp(req.file.buffer)
-      .resize(1920, 1080, { 
-        fit: 'inside',
-        withoutEnlargement: true 
+      .jpeg({ 
+        quality: 90,
+        progressive: true
       })
-      .jpeg({ quality: 85 })
       .toFile(photoPath);
 
-    // Create thumbnail
+    // Create thumbnail (400px max for masonry display)
     await sharp(req.file.buffer)
-      .resize(300, 300, { 
-        fit: 'cover',
-        position: 'center'
+      .resize(400, 400, { 
+        fit: 'inside',
+        withoutEnlargement: true
       })
-      .jpeg({ quality: 70 })
+      .jpeg({ 
+        quality: 75
+      })
       .toFile(thumbnailPath);
 
     // Save photo info to database

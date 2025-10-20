@@ -243,6 +243,9 @@ class Dashboard {
             return;
         }
 
+        // Validate image dimensions
+        this.validateImageDimensions(file);
+
         // Update UI to show selected file
         const fileName = file.name.length > 30 ? file.name.substring(0, 30) + '...' : file.name;
         document.querySelector('.file-input-area p').textContent = `Selected: ${fileName}`;
@@ -252,6 +255,32 @@ class Dashboard {
         if (!titleInput.value) {
             titleInput.value = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
         }
+    }
+
+    validateImageDimensions(file) {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        
+        img.onload = () => {
+            const maxDimension = Math.max(img.width, img.height);
+            
+            if (maxDimension > 2048) {
+                this.showToast(`Image too large! Maximum dimension is 2048px, but your image is ${maxDimension}px. Please resize before uploading.`, 'error');
+                document.getElementById('photoFile').value = '';
+                document.querySelector('.file-input-area p').textContent = 'Click to select a photo or drag and drop';
+            } else {
+                this.showToast(`Image dimensions: ${img.width}x${img.height}px ✓`, 'success');
+            }
+            
+            URL.revokeObjectURL(url);
+        };
+        
+        img.onerror = () => {
+            this.showToast('Could not read image dimensions', 'error');
+            URL.revokeObjectURL(url);
+        };
+        
+        img.src = url;
     }
 
     // Upload Handling Methods

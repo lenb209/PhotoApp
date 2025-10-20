@@ -97,6 +97,9 @@ class PhotoShareLanding {
             this.loadPhotoStats(photo.id);
         });
 
+        // Initialize masonry layout after images load
+        this.initMasonryLayout();
+
         // Update load more button
         this.updateLoadMoreButton();
     }
@@ -665,6 +668,54 @@ class PhotoShareLanding {
             }
         } catch (error) {
             console.error('Error loading photo stats:', error);
+        }
+    }
+
+    // Masonry Layout Helper
+    initMasonryLayout() {
+        const stream = document.getElementById('photoStream');
+        if (!stream) return;
+
+        // Wait for images to load before adjusting layout
+        const images = stream.querySelectorAll('img');
+        let loadedImages = 0;
+
+        if (images.length === 0) return;
+
+        images.forEach(img => {
+            if (img.complete) {
+                loadedImages++;
+                if (loadedImages === images.length) {
+                    this.adjustMasonryLayout();
+                }
+            } else {
+                img.addEventListener('load', () => {
+                    loadedImages++;
+                    if (loadedImages === images.length) {
+                        this.adjustMasonryLayout();
+                    }
+                });
+            }
+        });
+    }
+
+    adjustMasonryLayout() {
+        // Force browser to recalculate column layout
+        const stream = document.getElementById('photoStream');
+        if (stream) {
+            stream.style.columnCount = '';
+            setTimeout(() => {
+                const width = stream.offsetWidth;
+                if (width < 400) {
+                    stream.style.columnCount = '1';
+                } else if (width < 768) {
+                    stream.style.columnCount = '2';
+                } else if (width < 1200) {
+                    stream.style.columnCount = '3';
+                } else {
+                    stream.style.columnCount = '4';
+                }
+            }, 100);
         }
     }
 
