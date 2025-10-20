@@ -124,6 +124,69 @@ function initializeTables() {
     }
   });
 
+  // Clubs table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS clubs (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      creatorId TEXT NOT NULL,
+      coverImage TEXT,
+      isPrivate BOOLEAN DEFAULT 0,
+      memberCount INTEGER DEFAULT 1,
+      photoCount INTEGER DEFAULT 0,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (creatorId) REFERENCES users (id) ON DELETE CASCADE
+    )
+  `, (err) => {
+    if (err) {
+      console.error('Error creating clubs table:', err);
+    } else {
+      console.log('✅ Clubs table ready');
+    }
+  });
+
+  // Club members table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS club_members (
+      id TEXT PRIMARY KEY,
+      clubId TEXT NOT NULL,
+      userId TEXT NOT NULL,
+      role TEXT DEFAULT 'member',
+      joinedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (clubId) REFERENCES clubs (id) ON DELETE CASCADE,
+      FOREIGN KEY (userId) REFERENCES users (id) ON DELETE CASCADE,
+      UNIQUE(clubId, userId)
+    )
+  `, (err) => {
+    if (err) {
+      console.error('Error creating club_members table:', err);
+    } else {
+      console.log('✅ Club members table ready');
+    }
+  });
+
+  // Club photos table (junction table for photos posted to clubs)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS club_photos (
+      id TEXT PRIMARY KEY,
+      clubId TEXT NOT NULL,
+      photoId TEXT NOT NULL,
+      postedBy TEXT NOT NULL,
+      postedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (clubId) REFERENCES clubs (id) ON DELETE CASCADE,
+      FOREIGN KEY (photoId) REFERENCES photos (id) ON DELETE CASCADE,
+      FOREIGN KEY (postedBy) REFERENCES users (id) ON DELETE CASCADE,
+      UNIQUE(clubId, photoId)
+    )
+  `, (err) => {
+    if (err) {
+      console.error('Error creating club_photos table:', err);
+    } else {
+      console.log('✅ Club photos table ready');
+    }
+  });
+
   // Likes table
   db.run(`
     CREATE TABLE IF NOT EXISTS likes (
@@ -505,11 +568,252 @@ const commentOperations = {
   }
 };
 
+// Club operations
+const clubOperations = {
+  // Create new club
+  createClub: (clubData) => {
+    return new Promise((resolve, reject) => {
+      const { id, name, description, creatorId, coverImage, isPrivate } = clubData;
+      db.run(`
+        INSERT INTO clubs (id, name, description, creatorId, coverImage, isPrivate)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `, [id, name, description, creatorId, coverImage, isPrivate], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          // Add creator as owner of the club
+          const { v4: uuidv4 } = require('uuid');
+          const membershipId = uuidv4();
+          db.run(`
+            INSERT INTO club_members (id, clubId, userId, role)
+            VALUES (?, ?, ?, 'owner')
+          `, [membershipId, id, creatorId], (memberErr) => {
+            if (memberErr) {
+              reject(memberErr);
+            } else {
+              clubOperations.getClubById(id)
+                .then(resolve)
+                .catch(reject);
+            }
+          });
+        }
+      });
+    });
+  },
+
+  // Get club by ID
+  getClubById: (id) => {
+    return new Promise((resolve, reject) => {
+      db.get(`
+        SELECT c.*, u.username as creatorUsername, u.displayName as creatorDisplayName
+        FROM clubs c
+        LEFT JOIN users u ON c.creatorId = u.id
+        WHERE c.id = ?
+      `, [id], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+  },
+
+  // Get all clubs with pagination
+  getAllClubs: (limit = 20, offset = 0) => {
+    return new Promise((resolve, reject) => {
+      db.all(`
+        SELECT c.*, u.username as creatorUsername, u.displayName as creatorDisplayName
+        FROM clubs c
+        LEFT JOIN users u ON c.creatorId = u.id
+        WHERE c.isPrivate = 0
+        ORDER BY c.createdAt DESC
+        LIMIT ? OFFSET ?
+      `, [limit, offset], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  },
+
+  // Get clubs by user ID (clubs the user is a member of)
+  getClubsByUserId: (userId) => {
+    return new Promise((resolve, reject) => {
+      db.all(`
+        SELECT c.*, u.username as creatorUsername, u.displayName as creatorDisplayName, cm.role
+        FROM clubs c
+        LEFT JOIN users u ON c.creatorId = u.id
+        JOIN club_members cm ON c.id = cm.clubId
+        WHERE cm.userId = ?
+        ORDER BY c.createdAt DESC
+      `, [userId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  },
+
+  // Join club
+  joinClub: (clubId, userId) => {
+    return new Promise((resolve, reject) => {
+      const { v4: uuidv4 } = require('uuid');
+      const membershipId = uuidv4();
+      
+      db.run(`
+        INSERT INTO club_members (id, clubId, userId, role)
+        VALUES (?, ?, ?, 'member')
+      `, [membershipId, clubId, userId], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          // Update member count
+          db.run(`
+            UPDATE clubs SET memberCount = memberCount + 1 WHERE id = ?
+          `, [clubId], (updateErr) => {
+            if (updateErr) reject(updateErr);
+            else resolve({ success: true, membershipId });
+          });
+        }
+      });
+    });
+  },
+
+  // Leave club
+  leaveClub: (clubId, userId) => {
+    return new Promise((resolve, reject) => {
+      db.run(`
+        DELETE FROM club_members 
+        WHERE clubId = ? AND userId = ?
+      `, [clubId, userId], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          // Update member count
+          db.run(`
+            UPDATE clubs SET memberCount = memberCount - 1 WHERE id = ?
+          `, [clubId], (updateErr) => {
+            if (updateErr) reject(updateErr);
+            else resolve({ success: true });
+          });
+        }
+      });
+    });
+  },
+
+  // Check if user is member of club
+  isClubMember: (clubId, userId) => {
+    return new Promise((resolve, reject) => {
+      db.get(`
+        SELECT role FROM club_members 
+        WHERE clubId = ? AND userId = ?
+      `, [clubId, userId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row ? { isMember: true, role: row.role } : { isMember: false, role: null });
+      });
+    });
+  },
+
+  // Get club members
+  getClubMembers: (clubId) => {
+    return new Promise((resolve, reject) => {
+      db.all(`
+        SELECT cm.*, u.username, u.displayName, u.profileImage
+        FROM club_members cm
+        JOIN users u ON cm.userId = u.id
+        WHERE cm.clubId = ?
+        ORDER BY 
+          CASE cm.role 
+            WHEN 'owner' THEN 1
+            WHEN 'admin' THEN 2
+            WHEN 'member' THEN 3
+          END,
+          cm.joinedAt ASC
+      `, [clubId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  },
+
+  // Add photo to club
+  addPhotoToClub: (clubId, photoId, userId) => {
+    return new Promise((resolve, reject) => {
+      const { v4: uuidv4 } = require('uuid');
+      const clubPhotoId = uuidv4();
+      
+      db.run(`
+        INSERT INTO club_photos (id, clubId, photoId, postedBy)
+        VALUES (?, ?, ?, ?)
+      `, [clubPhotoId, clubId, photoId, userId], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          // Update photo count
+          db.run(`
+            UPDATE clubs SET photoCount = photoCount + 1 WHERE id = ?
+          `, [clubId], (updateErr) => {
+            if (updateErr) reject(updateErr);
+            else resolve({ success: true, clubPhotoId });
+          });
+        }
+      });
+    });
+  },
+
+  // Get photos for club
+  getClubPhotos: (clubId, limit = 20, offset = 0) => {
+    return new Promise((resolve, reject) => {
+      db.all(`
+        SELECT p.*, cp.postedAt, u.username as postedByUsername, u.displayName as postedByDisplayName
+        FROM club_photos cp
+        JOIN photos p ON cp.photoId = p.id
+        JOIN users u ON cp.postedBy = u.id
+        WHERE cp.clubId = ?
+        ORDER BY cp.postedAt DESC
+        LIMIT ? OFFSET ?
+      `, [clubId, limit, offset], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  },
+
+  // Update club info
+  updateClub: (clubId, updateData) => {
+    return new Promise((resolve, reject) => {
+      const { name, description, coverImage, isPrivate } = updateData;
+      db.run(`
+        UPDATE clubs 
+        SET name = ?, description = ?, coverImage = ?, isPrivate = ?
+        WHERE id = ?
+      `, [name, description, coverImage, isPrivate, clubId], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          clubOperations.getClubById(clubId)
+            .then(resolve)
+            .catch(reject);
+        }
+      });
+    });
+  },
+
+  // Delete club
+  deleteClub: (clubId) => {
+    return new Promise((resolve, reject) => {
+      db.run(`
+        DELETE FROM clubs WHERE id = ?
+      `, [clubId], function(err) {
+        if (err) reject(err);
+        else resolve({ success: true });
+      });
+    });
+  }
+};
+
 // Export database operations
 module.exports = {
   db,
   ...photoOperations,
   ...userOperations,
   ...likeOperations,
-  ...commentOperations
+  ...commentOperations,
+  ...clubOperations
 };

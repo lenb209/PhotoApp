@@ -113,10 +113,51 @@ class Dashboard {
             this.handleFileSelect(e);
         });
 
+        // Club events
+        document.getElementById('createClubBtn')?.addEventListener('click', () => {
+            this.showCreateClubModal();
+        });
+
+        document.getElementById('createClubForm')?.addEventListener('submit', (e) => {
+            this.handleClubCreation(e);
+        });
+
+        // Club tabs
+        document.querySelectorAll('.club-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const filter = e.target.dataset.filter;
+                this.switchClubTab(filter);
+            });
+        });
+
+        // Club discover filters
+        document.querySelectorAll('.clubs-content .filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const filter = e.target.dataset.filter;
+                this.filterDiscoverClubs(filter);
+            });
+        });
+
+        document.getElementById('loadMoreClubs')?.addEventListener('click', () => {
+            this.loadMoreClubs();
+        });
+
+        // Modal close events for club modal
+        document.querySelectorAll('#createClubModal .modal-close').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.closeCreateClubModal();
+            });
+        });
+
+        document.querySelector('#createClubModal .modal-overlay')?.addEventListener('click', () => {
+            this.closeCreateClubModal();
+        });
+
         // Keyboard events
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.closeUploadModal();
+                this.closeCreateClubModal();
             }
         });
     }
@@ -153,6 +194,9 @@ class Dashboard {
                 break;
             case 'following':
                 this.loadFollowingData();
+                break;
+            case 'clubs':
+                this.loadClubsData();
                 break;
             case 'profile':
                 this.loadProfileData();
@@ -723,6 +767,197 @@ class Dashboard {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // Club Methods
+    async loadClubsData() {
+        this.loadMyClubs();
+        this.loadDiscoverClubs();
+    }
+
+    async loadMyClubs() {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/clubs/user/${this.currentUser.id}`, {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const clubs = await response.json();
+                this.displayMyClubs(clubs);
+            } else {
+                this.showToast('Failed to load your clubs', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading my clubs:', error);
+            this.showToast('Failed to load your clubs', 'error');
+        }
+    }
+
+    async loadDiscoverClubs() {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/clubs`, {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const clubs = await response.json();
+                this.displayDiscoverClubs(clubs);
+            } else {
+                this.showToast('Failed to load clubs', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading discover clubs:', error);
+            this.showToast('Failed to load clubs', 'error');
+        }
+    }
+
+    displayMyClubs(clubs) {
+        const container = document.getElementById('myClubsList');
+        if (!container) return;
+
+        if (clubs.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <h3>No Clubs Yet</h3>
+                    <p>You haven't joined any photography clubs yet.</p>
+                    <button class="btn-primary" onclick="document.querySelector('[data-filter=\"discover\"]').click()">Discover Clubs</button>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = clubs.map(club => this.createClubCard(club, true)).join('');
+    }
+
+    displayDiscoverClubs(clubs) {
+        const container = document.getElementById('discoverClubsList');
+        if (!container) return;
+
+        container.innerHTML = clubs.map(club => this.createClubCard(club, false)).join('');
+    }
+
+    createClubCard(club, isUserClub) {
+        const memberText = club.memberCount === 1 ? 'member' : 'members';
+        const photoText = club.photoCount === 1 ? 'photo' : 'photos';
+        
+        return `
+            <div class="club-card" data-club-id="${club.id}">
+                <div class="club-cover" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-light));">
+                    ${club.coverImage ? `<img src="${club.coverImage}" alt="${this.escapeHtml(club.name)}">` : ''}
+                </div>
+                <div class="club-info">
+                    <h3 class="club-name">${this.escapeHtml(club.name)}</h3>
+                    <p class="club-description">${this.escapeHtml(club.description || 'No description')}</p>
+                    <div class="club-stats">
+                        <span>${club.memberCount} ${memberText}</span>
+                        <span>${club.photoCount} ${photoText}</span>
+                        ${club.isPrivate ? '<span class="private-badge">Private</span>' : ''}
+                    </div>
+                    <div class="club-meta">
+                        <span>by ${this.escapeHtml(club.creatorDisplayName || club.creatorUsername)}</span>
+                        ${isUserClub ? `<span class="user-role">${club.role}</span>` : ''}
+                    </div>
+                </div>
+                <div class="club-actions">
+                    <button class="btn-primary btn-sm" onclick="window.location.href='club.html?id=${club.id}'">
+                        View Club
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    switchClubTab(filter) {
+        // Update tab buttons
+        document.querySelectorAll('.club-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+
+        // Update content sections
+        document.querySelectorAll('.clubs-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        if (filter === 'my-clubs') {
+            document.getElementById('myClubsContent').classList.add('active');
+        } else {
+            document.getElementById('discoverContent').classList.add('active');
+        }
+    }
+
+    filterDiscoverClubs(filter) {
+        // Update filter buttons
+        document.querySelectorAll('.discover-filters .filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`.discover-filters [data-filter="${filter}"]`).classList.add('active');
+
+        // TODO: Implement filtering logic
+        console.log('Filter discover clubs by:', filter);
+    }
+
+    showCreateClubModal() {
+        const modal = document.getElementById('createClubModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeCreateClubModal() {
+        const modal = document.getElementById('createClubModal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        
+        // Reset form
+        document.getElementById('createClubForm').reset();
+    }
+
+    async handleClubCreation(e) {
+        e.preventDefault();
+        
+        try {
+            const formData = new FormData(e.target);
+            const clubData = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                isPrivate: formData.get('isPrivate') === 'on'
+            };
+
+            this.showLoading(true);
+
+            const response = await fetch(`${this.apiBaseUrl}/clubs`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(clubData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showToast(result.message, 'success');
+                this.closeCreateClubModal();
+                
+                // Redirect to the new club page
+                setTimeout(() => {
+                    window.location.href = `club.html?id=${result.club.id}`;
+                }, 1500);
+            } else {
+                this.showToast(result.error || 'Failed to create club', 'error');
+            }
+        } catch (error) {
+            console.error('Error creating club:', error);
+            this.showToast('Failed to create club', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    async loadMoreClubs() {
+        // TODO: Implement pagination for clubs
+        console.log('Load more clubs - to be implemented');
     }
 
     // Authentication Methods

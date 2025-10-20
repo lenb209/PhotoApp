@@ -49,6 +49,17 @@
                     </svg>
                     Following
                 </button>
+                <button class="nav-item" data-section="clubs">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 010 7.75"></path>
+                        <circle cx="18" cy="18" r="3"></circle>
+                        <path d="M20.2 15.8L22 14"></path>
+                    </svg>
+                    Clubs
+                </button>
                 <button class="nav-item" data-section="profile">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
@@ -197,8 +208,84 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Clubs Section -->
+            <section id="clubsSection" class="content-section">
+                <div class="section-header">
+                    <h2>Photography Clubs</h2>
+                    <p>Join clubs to connect with photographers who share your interests</p>
+                    <button id="createClubBtn" class="btn-primary">Create New Club</button>
+                </div>
+
+                <!-- Club Tabs -->
+                <div class="club-tabs">
+                    <button class="club-tab active" data-filter="my-clubs">My Clubs</button>
+                    <button class="club-tab" data-filter="discover">Discover Clubs</button>
+                </div>
+
+                <!-- My Clubs -->
+                <div id="myClubsContent" class="clubs-content active">
+                    <div id="myClubsList" class="clubs-grid">
+                        <!-- User's clubs will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Discover Clubs -->
+                <div id="discoverContent" class="clubs-content">
+                    <div class="discover-filters">
+                        <button class="filter-btn active" data-filter="all">All Clubs</button>
+                        <button class="filter-btn" data-filter="public">Public Only</button>
+                        <button class="filter-btn" data-filter="popular">Popular</button>
+                    </div>
+                    
+                    <div id="discoverClubsList" class="clubs-grid">
+                        <!-- Discoverable clubs will be loaded here -->
+                    </div>
+                    
+                    <div class="load-more-container">
+                        <button id="loadMoreClubs" class="btn-secondary">Load More Clubs</button>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
+
+    <!-- Create Club Modal -->
+    <div id="createClubModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="modal-body">
+                <h2>Create New Club</h2>
+                <p>Start a photography club to connect with like-minded photographers</p>
+                
+                <form id="createClubForm">
+                    <div class="form-group">
+                        <label for="clubName">Club Name</label>
+                        <input type="text" id="clubName" name="name" maxlength="100" placeholder="Enter club name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clubDescription">Description</label>
+                        <textarea id="clubDescription" name="description" rows="4" maxlength="500" placeholder="Describe your club's purpose and what members can expect..."></textarea>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="clubPrivate" name="isPrivate">
+                            <span class="checkmark"></span>
+                            Make this club private (invite-only)
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn-primary">Create Club</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Upload Media Modal -->
     <div id="uploadModal" class="modal hidden">

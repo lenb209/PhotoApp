@@ -45,6 +45,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/clubs', require('./routes/clubs'));
 app.use('/api/photos', require('./routes/photos'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/likes', require('./routes/likes'));
@@ -57,6 +58,10 @@ app.get('/', (req, res) => {
 
 app.get('/gallery', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/gallery.html'));
+});
+
+app.get('/club', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/club.html'));
 });
 
 // Health check endpoint
