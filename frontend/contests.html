@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photography Contests - The Photography Club</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="contests.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo">📸 The Photography Club</a>
+            <nav class="nav">
+                <a href="gallery.html" class="btn-secondary">My Dashboard</a>
+                <div id="userMenu" class="user-menu">
+                    <span id="welcomeUser" class="welcome-text"></span>
+                    <button id="logoutBtn" class="btn-secondary">Logout</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="contests-main">
+        <!-- Hero Section -->
+        <section class="contests-hero">
+            <div class="container">
+                <h1>Photography Contests</h1>
+                <p>Showcase your skills, compete with fellow photographers, and win amazing prizes</p>
+            </div>
+        </section>
+
+        <!-- Contest Navigation -->
+        <section class="contest-nav">
+            <div class="container">
+                <div class="contest-tabs">
+                    <button class="contest-tab active" data-filter="active">Active Contests</button>
+                    <button class="contest-tab" data-filter="upcoming">Upcoming</button>
+                    <button class="contest-tab" data-filter="past">Past Results</button>
+                    <button class="contest-tab" data-filter="my-contests">My Contests</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Active Contests Section -->
+        <section id="activeContests" class="contest-section active">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Active Contests</h2>
+                    <p>Currently running photography contests you can enter</p>
+                </div>
+                
+                <div class="contests-grid" id="activeContestsGrid">
+                    <!-- Active contests will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Upcoming Contests Section -->
+        <section id="upcomingContests" class="contest-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Upcoming Contests</h2>
+                    <p>Future contests to mark your calendar</p>
+                </div>
+                
+                <div class="contests-grid" id="upcomingContestsGrid">
+                    <!-- Upcoming contests will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Past Contests Section -->
+        <section id="pastContests" class="contest-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Past Contest Results</h2>
+                    <p>Browse previous contest winners and submissions</p>
+                </div>
+                
+                <div class="contests-grid" id="pastContestsGrid">
+                    <!-- Past contests will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- My Contests Section -->
+        <section id="myContests" class="contest-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>My Contest Entries</h2>
+                    <p>Track your submissions and results</p>
+                </div>
+                
+                <div class="contests-grid" id="myContestsGrid">
+                    <!-- User's contest entries will be loaded here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Contest Entry Modal -->
+    <div id="contestEntryModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content contest-modal">
+            <button class="modal-close">&times;</button>
+            <div class="modal-body">
+                <h2>Enter Contest</h2>
+                <div id="contestDetails" class="contest-details">
+                    <!-- Contest details will be loaded here -->
+                </div>
+                
+                <form id="contestEntryForm" class="contest-entry-form">
+                    <div class="form-group">
+                        <label for="entryTitle">Photo Title</label>
+                        <input type="text" id="entryTitle" name="title" maxlength="100" placeholder="Enter a title for your photo" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="entryDescription">Description (Optional)</label>
+                        <textarea id="entryDescription" name="description" rows="3" maxlength="500" placeholder="Tell us about this photo..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="entryPhoto">Select Photo</label>
+                        <div class="photo-selection">
+                            <input type="file" id="entryPhoto" name="photo" accept="image/*" required>
+                            <div class="photo-preview" id="photoPreview"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn-primary">Submit Entry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">📸 The Photography Club</h3>
+                    <p class="footer-description">Share your passion for photography with a community of like-minded creators.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="Instagram">📷</a>
+                        <a href="#" class="social-link" aria-label="Twitter">🐦</a>
+                        <a href="#" class="social-link" aria-label="Facebook">📘</a>
+                        <a href="#" class="social-link" aria-label="YouTube">📺</a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="contests.html">Contests</a></li>
+                        <li><a href="#clubs">Clubs</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Community</h4>
+                    <ul class="footer-links">
+                        <li><a href="gallery.html">Photography Clubs</a></li>
+                        <li><a href="contests.html">Photo Contests</a></li>
+                        <li><a href="#tips">Photo Tips</a></li>
+                        <li><a href="#events">Events</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="#help">Help Center</a></li>
+                        <li><a href="#contact">Contact Us</a></li>
+                        <li><a href="#privacy">Privacy Policy</a></li>
+                        <li><a href="#terms">Terms of Service</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Contact</h4>
+                    <div class="contact-info">
+                        <p><span class="contact-icon">📧</span> <span class="contact-text">hello@photographyclub.com</span></p>
+                        <p><span class="contact-icon">📞</span> <span class="contact-text">(555) 123-PHOTO</span></p>
+                        <p><span class="contact-icon">📍</span> <span class="contact-text">123 Camera Street<br>Photo City, PC 12345</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 The Photography Club. All rights reserved.</p>
+                    <p class="footer-version">Made with ❤️ for photographers</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="contests.js"></script>
+</body>
+</html>

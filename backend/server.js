@@ -50,6 +50,7 @@ app.use('/api/photos', require('./routes/photos'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/likes', require('./routes/likes'));
 app.use('/api/comments', require('./routes/comments'));
+app.use('/api/contests', require('./routes/contests'));
 
 // Serve frontend
 app.get('/', (req, res) => {
@@ -62,6 +63,10 @@ app.get('/gallery', (req, res) => {
 
 app.get('/club', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/club.html'));
+});
+
+app.get('/contests', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/contests.html'));
 });
 
 // Health check endpoint

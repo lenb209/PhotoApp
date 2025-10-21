@@ -249,24 +249,30 @@ class ClubPage {
         try {
             this.showLoading(true);
             
-            const response = await fetch(`${this.apiBaseUrl}/clubs/${this.clubId}`, {
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error('Club not found');
-                } else if (response.status === 403) {
-                    throw new Error('This club is private');
-                } else {
-                    throw new Error('Failed to load club');
+            // TEMP: Use mock data for live server testing
+            this.club = {
+                id: this.clubId || 1,
+                name: "Street Photography Club",
+                description: "A community for photographers passionate about capturing life on the streets. We share techniques, organize photo walks, and celebrate the art of candid urban photography.",
+                isPrivate: false,
+                memberCount: 28,
+                photoCount: 156,
+                creatorDisplayName: "Alex Johnson",
+                creatorUsername: "alexj_photo",
+                createdAt: "2024-08-15T10:30:00Z",
+                userMembership: {
+                    isMember: true,
+                    role: "member",
+                    status: "approved"
                 }
-            }
-
-            this.club = await response.json();
+            };
+            
             this.userMembership = this.club.userMembership || { isMember: false };
             
             this.updateClubDisplay();
+            
+            // Load mock photos
+            this.loadMockPhotos();
             
         } catch (error) {
             console.error('Error loading club:', error);
@@ -275,6 +281,11 @@ class ClubPage {
         } finally {
             this.showLoading(false);
         }
+    }
+
+    loadMockPhotos() {
+        // Call the existing photo loading method
+        this.loadClubPhotos();
     }
 
     updateClubDisplay() {
@@ -362,22 +373,61 @@ class ClubPage {
             case 'members':
                 this.loadClubMembers();
                 break;
+            case 'contests':
+                this.loadClubContests();
+                break;
         }
     }
 
     // Load Club Data
     async loadClubPhotos() {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/clubs/${this.clubId}/photos`, {
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                this.photos = await response.json();
-                this.displayPhotos();
-            } else {
-                this.showToast('Failed to load club photos', 'error');
-            }
+            // TEMP: Use mock data for live server testing
+            this.photos = [
+                {
+                    id: "1",
+                    title: "Street Art Downtown",
+                    description: "Amazing murals in the city center",
+                    filename: "street-art-1.jpg",
+                    thumbnailFilename: "thumb-street-art-1.jpg",
+                    uploadDate: "2024-10-15T14:30:00Z",
+                    uploader: {
+                        username: "alexj_photo",
+                        displayName: "Alex Johnson"
+                    },
+                    tags: ["street", "art", "mural", "urban"],
+                    likes: 23
+                },
+                {
+                    id: "2", 
+                    title: "Morning Rush",
+                    description: "Capturing the energy of morning commuters",
+                    filename: "morning-rush-2.jpg",
+                    thumbnailFilename: "thumb-morning-rush-2.jpg",
+                    uploadDate: "2024-10-12T08:15:00Z",
+                    uploader: {
+                        username: "sarah_lens",
+                        displayName: "Sarah Chen"
+                    },
+                    tags: ["street", "people", "morning", "commute"],
+                    likes: 31
+                },
+                {
+                    id: "3",
+                    title: "Shadows and Light",
+                    description: "Playing with natural light and urban shadows",
+                    filename: "shadows-light-3.jpg", 
+                    thumbnailFilename: "thumb-shadows-light-3.jpg",
+                    uploadDate: "2024-10-10T16:45:00Z",
+                    uploader: {
+                        username: "mike_street",
+                        displayName: "Mike Rodriguez"
+                    },
+                    tags: ["shadows", "light", "architecture", "street"],
+                    likes: 18
+                }
+            ];
+            this.displayPhotos();
         } catch (error) {
             console.error('Error loading club photos:', error);
             this.showToast('Failed to load club photos', 'error');
@@ -425,20 +475,196 @@ class ClubPage {
 
     async loadClubMembers() {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/clubs/${this.clubId}/members`, {
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                this.members = await response.json();
-                this.displayMembers();
-            } else {
-                this.showToast('Failed to load club members', 'error');
-            }
+            // TEMP: Use mock data for live server testing
+            this.members = [
+                {
+                    id: 1,
+                    username: "alexj_photo",
+                    displayName: "Alex Johnson", 
+                    role: "owner",
+                    joinedAt: "2024-08-15T10:30:00Z",
+                    status: "approved",
+                    avatar: null
+                },
+                {
+                    id: 2,
+                    username: "sarah_lens",
+                    displayName: "Sarah Chen",
+                    role: "admin", 
+                    joinedAt: "2024-08-20T14:15:00Z",
+                    status: "approved",
+                    avatar: null
+                },
+                {
+                    id: 3,
+                    username: "mike_street",
+                    displayName: "Mike Rodriguez",
+                    role: "member",
+                    joinedAt: "2024-09-02T09:45:00Z", 
+                    status: "approved",
+                    avatar: null
+                },
+                {
+                    id: 4,
+                    username: "testuser",
+                    displayName: "Test User",
+                    role: "member",
+                    joinedAt: "2024-10-01T12:00:00Z",
+                    status: "approved", 
+                    avatar: null
+                }
+            ];
+            this.displayMembers();
         } catch (error) {
             console.error('Error loading club members:', error);
             this.showToast('Failed to load club members', 'error');
         }
+    }
+
+    async loadClubContests() {
+        try {
+            // TEMP: Use mock data for live server testing
+            const mockContests = [
+                {
+                    id: 1,
+                    title: "Weekly Street Challenge",
+                    description: "Capture the essence of street life in one powerful image. Show us your unique perspective on urban photography.",
+                    status: "active",
+                    start_date: "2024-10-21",
+                    end_date: "2024-10-28", 
+                    entry_fee: 0,
+                    max_entries: 1,
+                    total_entries: 8,
+                    prizes: [
+                        { position: "Winner", reward: "Featured Photo + Recognition" }
+                    ],
+                    club_id: this.clubId,
+                    is_public: false,
+                    category: "Weekly",
+                    club_name: this.club.name
+                },
+                {
+                    id: 2,
+                    title: "Best Portrait of the Month",
+                    description: "Show us your best portrait work. Can include environmental portraits, studio work, or candid captures.",
+                    status: "upcoming",
+                    start_date: "2024-11-01",
+                    end_date: "2024-11-30",
+                    entry_fee: 5,
+                    max_entries: 3,
+                    total_entries: 0,
+                    prizes: [
+                        { position: "1st Place", reward: "$100 + Certificate" },
+                        { position: "2nd Place", reward: "$50 + Recognition" },
+                        { position: "3rd Place", reward: "Certificate" }
+                    ],
+                    club_id: this.clubId,
+                    is_public: true,
+                    category: "Portrait",
+                    club_name: this.club.name
+                }
+            ];
+
+            this.displayClubContests(mockContests);
+        } catch (error) {
+            console.error('Error loading club contests:', error);
+            this.showToast('Failed to load club contests', 'error');
+        }
+    }
+
+    displayClubContests(contests) {
+        const container = document.getElementById('clubContestsGrid');
+        if (!container) return;
+
+        if (contests.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <h3>No contests yet</h3>
+                    <p>This club hasn't created any contests yet.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = contests.map(contest => this.createContestCard(contest)).join('');
+    }
+
+    createContestCard(contest) {
+        const endDate = new Date(contest.end_date).toLocaleDateString();
+        const daysLeft = Math.ceil((new Date(contest.end_date) - new Date()) / (1000 * 60 * 60 * 24));
+        
+        const badgeClass = contest.status === 'active' ? 'active' : 
+                          contest.status === 'upcoming' ? 'upcoming' : 'ended';
+        
+        const badgeText = contest.status === 'active' ? 'Active' :
+                         contest.status === 'upcoming' ? 'Upcoming' : 'Ended';
+
+        const actionButton = contest.status === 'active' ? 
+            `<button class="btn-primary" onclick="this.showContestEntry(${contest.id})">Enter Contest</button>` :
+            contest.status === 'upcoming' ? 
+            `<button class="btn-secondary" disabled>Opens Soon</button>` :
+            `<button class="btn-secondary">View Results</button>`;
+
+        return `
+            <div class="contest-card" data-contest-id="${contest.id}">
+                <div class="contest-image">
+                    <span class="contest-badge ${badgeClass}">${badgeText}</span>
+                    🏆
+                </div>
+                <div class="contest-info">
+                    <h3 class="contest-title">${this.escapeHtml(contest.title)}</h3>
+                    <p class="contest-description">${this.escapeHtml(contest.description)}</p>
+                    
+                    <div class="contest-meta">
+                        <div class="contest-meta-item">
+                            <p class="contest-meta-label">End Date</p>
+                            <p class="contest-meta-value">${endDate}</p>
+                        </div>
+                        <div class="contest-meta-item">
+                            <p class="contest-meta-label">Entries</p>
+                            <p class="contest-meta-value">${contest.total_entries}</p>
+                        </div>
+                    </div>
+
+                    <div class="contest-details">
+                        <div class="contest-detail-row">
+                            <span class="contest-detail-label">Entry Fee</span>
+                            <span class="contest-detail-value">${contest.entry_fee === 0 ? 'Free' : '$' + contest.entry_fee}</span>
+                        </div>
+                        <div class="contest-detail-row">
+                            <span class="contest-detail-label">Max Entries</span>
+                            <span class="contest-detail-value">${contest.max_entries}</span>
+                        </div>
+                        ${contest.status === 'active' && daysLeft > 0 ? `
+                        <div class="contest-detail-row">
+                            <span class="contest-detail-label">Days Left</span>
+                            <span class="contest-detail-value">${daysLeft} days</span>
+                        </div>
+                        ` : ''}
+                        <div class="contest-detail-row">
+                            <span class="contest-detail-label">Visibility</span>
+                            <span class="contest-detail-value">${contest.is_public ? 'Public' : 'Members Only'}</span>
+                        </div>
+                    </div>
+
+                    <div class="contest-prizes">
+                        <h4>Prizes</h4>
+                        <ul class="prize-list">
+                            ${contest.prizes.map(prize => `
+                                <li class="prize-item">
+                                    <span class="prize-position">${prize.position}</span>
+                                    <span class="prize-reward">${prize.reward}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <div class="contest-actions">
+                        ${actionButton}
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     displayMembers() {
@@ -722,6 +948,12 @@ class ClubPage {
     async loadMorePhotos() {
         // Implement pagination for photos
         console.log('Load more photos - to be implemented');
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 

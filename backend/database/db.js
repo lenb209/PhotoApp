@@ -224,6 +224,59 @@ function initializeTables() {
       console.log('✅ Comments table ready');
     }
   });
+
+  // Contests table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS contests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      category TEXT DEFAULT 'General',
+      start_date TEXT NOT NULL,
+      end_date TEXT NOT NULL,
+      entry_fee REAL DEFAULT 0,
+      max_entries INTEGER DEFAULT 3,
+      prizes TEXT, -- JSON string
+      club_id INTEGER,
+      is_public BOOLEAN DEFAULT 1,
+      status TEXT DEFAULT 'upcoming', -- upcoming, active, ended
+      created_by INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (club_id) REFERENCES clubs (id) ON DELETE CASCADE,
+      FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
+    )
+  `, (err) => {
+    if (err) {
+      console.error('Error creating contests table:', err);
+    } else {
+      console.log('✅ Contests table ready');
+    }
+  });
+
+  // Contest entries table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS contest_entries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      contest_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT,
+      image_url TEXT NOT NULL,
+      submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      status TEXT DEFAULT 'submitted', -- submitted, reviewed, winner, disqualified
+      position INTEGER, -- 1st, 2nd, 3rd, etc.
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (contest_id) REFERENCES contests (id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+      UNIQUE(contest_id, user_id, title) -- Prevent duplicate entries from same user with same title
+    )
+  `, (err) => {
+    if (err) {
+      console.error('Error creating contest_entries table:', err);
+    } else {
+      console.log('✅ Contest entries table ready');
+    }
+  });
 }
 
 // Photo operations

@@ -1,0 +1,461 @@
+/* Contests Page Styles */
+
+.contests-main {
+    flex: 1;
+    min-height: calc(100vh - 80px);
+}
+
+/* Hero Section */
+.contests-hero {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: var(--text-light);
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.contests-hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+}
+
+.contests-hero p {
+    font-size: 1.25rem;
+    margin: 0;
+    opacity: 0.9;
+}
+
+/* Contest Navigation */
+.contest-nav {
+    background: var(--background-secondary);
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.contest-tabs {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.contest-tab {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid var(--border-color);
+    background: var(--background-primary);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.contest-tab:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.contest-tab.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--text-light);
+}
+
+/* Contest Sections */
+.contest-section {
+    padding: 3rem 0;
+    display: none;
+}
+
+.contest-section.active {
+    display: block;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.section-header h2 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+}
+
+.section-header p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Contests Grid */
+.contests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.contest-card {
+    background: var(--background-primary);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contest-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.contest-image {
+    height: 200px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: white;
+    position: relative;
+}
+
+.contest-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.contest-badge.active {
+    background: #10b981;
+    color: white;
+}
+
+.contest-badge.upcoming {
+    background: #f59e0b;
+    color: white;
+}
+
+.contest-badge.ended {
+    background: #6b7280;
+    color: white;
+}
+
+.contest-info {
+    padding: 1.5rem;
+}
+
+.contest-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.contest-description {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0 0 1rem 0;
+}
+
+.contest-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.contest-meta-item {
+    text-align: center;
+}
+
+.contest-meta-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0 0 0.25rem 0;
+}
+
+.contest-meta-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.contest-details {
+    margin-bottom: 1.5rem;
+}
+
+.contest-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.contest-detail-row:last-child {
+    border-bottom: none;
+}
+
+.contest-detail-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.contest-detail-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.contest-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.contest-actions .btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+/* Contest Entry Modal */
+.contest-modal {
+    max-width: 600px;
+    width: 90vw;
+}
+
+.contest-entry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.photo-selection {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: border-color 0.2s ease;
+}
+
+.photo-selection:hover {
+    border-color: var(--primary-color);
+}
+
+.photo-selection input[type="file"] {
+    margin-bottom: 1rem;
+}
+
+.photo-preview {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.photo-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Prize Display */
+.contest-prizes {
+    background: var(--background-secondary);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.contest-prizes h4 {
+    margin: 0 0 0.75rem 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.prize-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.prize-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.prize-item:last-child {
+    border-bottom: none;
+}
+
+.prize-position {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.prize-reward {
+    color: var(--text-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .contests-hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .contests-hero p {
+        font-size: 1.1rem;
+    }
+    
+    .contest-tabs {
+        gap: 0.5rem;
+    }
+    
+    .contest-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .contests-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .contest-meta {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .contest-actions {
+        flex-direction: column;
+    }
+    
+    .contest-actions .btn {
+        flex: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .contest-section {
+        padding: 2rem 0;
+    }
+    
+    .section-header h2 {
+        font-size: 2rem;
+    }
+    
+    .contest-info {
+        padding: 1rem;
+    }
+    
+    .contest-modal {
+        width: 95vw;
+    }
+}
+
+/* =========================
+   UTILITY & FEEDBACK STYLES
+   ========================= */
+
+.hidden {
+    display: none !important;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-light);
+}
+
+.empty-state h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.empty-state p {
+    margin-bottom: 1.5rem;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    color: white;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-left: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.toast {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    animation: slideIn 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.toast.success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.toast.error {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+}
+
+.toast.info {
+    background: linear-gradient(135deg, #007bff, #6f42c1);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

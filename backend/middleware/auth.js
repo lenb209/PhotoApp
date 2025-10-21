@@ -6,6 +6,13 @@ const requireAuth = (req, res, next) => {
       message: 'Authentication required'
     });
   }
+  
+  // Set user object for use in routes
+  req.user = {
+    id: req.session.userId,
+    username: req.session.username
+  };
+  
   next();
 };
 
