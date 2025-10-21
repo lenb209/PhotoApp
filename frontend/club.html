@@ -168,20 +168,26 @@
                         <p>Photography contests for club members</p>
                     </div>
                     
-                    <div class="contests-tabs">
-                        <button class="contest-tab active" data-filter="active">Active</button>
-                        <button class="contest-tab" data-filter="upcoming">Upcoming</button>
-                        <button class="contest-tab" data-filter="past">Past</button>
+                    <div class="club-contest-nav">
+                        <div class="contests-tabs">
+                            <button class="contest-tab active" data-filter="active">Active</button>
+                            <button class="contest-tab" data-filter="upcoming">Upcoming</button>
+                            <button class="contest-tab" data-filter="past">Past</button>
+                        </div>
+                        <div class="contest-actions">
+                            <button id="createClubContestBtn" class="btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Create Contest
+                            </button>
+                        </div>
                     </div>
 
                     <div class="contests-content">
                         <div id="clubContestsGrid" class="contests-grid">
                             <div class="loading-message">Loading contests...</div>
                         </div>
-                    </div>
-                    
-                    <div class="contest-actions" id="contestActions" style="display: none;">
-                        <button id="createContestBtn" class="btn-primary">Create Contest</button>
                     </div>
                 </section>
             </div>
@@ -274,6 +280,119 @@
 
     <!-- Toast Notifications -->
     <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Create Club Contest Modal -->
+    <div id="createClubContestModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content contest-modal large-modal">
+            <button class="modal-close">&times;</button>
+            <div class="modal-body">
+                <h2>Create Club Contest</h2>
+                
+                <form id="createClubContestForm" class="create-contest-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clubContestTitle">Contest Title</label>
+                            <input type="text" id="clubContestTitle" name="title" maxlength="100" placeholder="Enter contest title" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="clubContestCategory">Category</label>
+                            <select id="clubContestCategory" name="category" required>
+                                <option value="General">General</option>
+                                <option value="Portrait">Portrait</option>
+                                <option value="Landscape">Landscape</option>
+                                <option value="Street">Street Photography</option>
+                                <option value="Wildlife">Wildlife</option>
+                                <option value="Architecture">Architecture</option>
+                                <option value="Abstract">Abstract</option>
+                                <option value="Black & White">Black & White</option>
+                                <option value="Nature">Nature</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Weekly">Weekly Challenge</option>
+                                <option value="Monthly">Monthly Competition</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clubContestDescription">Description</label>
+                        <textarea id="clubContestDescription" name="description" rows="4" maxlength="1000" placeholder="Describe the contest theme, rules, and what you're looking for..." required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clubStartDate">Start Date</label>
+                            <input type="date" id="clubStartDate" name="start_date" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="clubEndDate">End Date</label>
+                            <input type="date" id="clubEndDate" name="end_date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clubEntryFee">Entry Fee ($)</label>
+                            <input type="number" id="clubEntryFee" name="entry_fee" min="0" step="0.01" value="0" placeholder="0.00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="clubMaxEntries">Max Entries per Member</label>
+                            <input type="number" id="clubMaxEntries" name="max_entries" min="1" max="10" value="3" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clubContestVisibility">Contest Visibility</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="contest_visibility" value="public" checked>
+                                <span class="radio-custom"></span>
+                                Public (Anyone can view and enter)
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="contest_visibility" value="members">
+                                <span class="radio-custom"></span>
+                                Members Only (Club members can view and enter)
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="contest_visibility" value="private">
+                                <span class="radio-custom"></span>
+                                Private (Only club members can view)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Prizes</h3>
+                        <div id="clubPrizesContainer">
+                            <div class="prize-item">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Position</label>
+                                        <input type="text" name="club_prize_position[]" placeholder="Winner" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Reward</label>
+                                        <input type="text" name="club_prize_reward[]" placeholder="Featured Photo + Recognition" required>
+                                    </div>
+                                    <button type="button" class="btn-icon remove-prize" onclick="this.parentElement.parentElement.remove()">×</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="addClubPrizeBtn" class="btn-secondary">Add Prize</button>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn-primary">Create Club Contest</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">

@@ -37,6 +37,28 @@ class ContestManager {
             this.handleContestEntry(e);
         });
 
+        // Create contest button
+        document.getElementById('createContestBtn')?.addEventListener('click', () => {
+            this.showCreateContestModal();
+        });
+
+        // Create contest form
+        document.getElementById('createContestForm')?.addEventListener('submit', (e) => {
+            this.handleCreateContest(e);
+        });
+
+        // Contest type radio buttons
+        document.querySelectorAll('input[name="contest_type"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.toggleClubSelection(e.target.value === 'club');
+            });
+        });
+
+        // Add prize button
+        document.getElementById('addPrizeBtn')?.addEventListener('click', () => {
+            this.addPrizeField();
+        });
+
         // Photo file input
         document.getElementById('entryPhoto')?.addEventListener('change', (e) => {
             this.handlePhotoPreview(e);
@@ -375,13 +397,156 @@ class ContestManager {
     }
 
     closeModal() {
-        const modal = document.getElementById('contestEntryModal');
-        modal.classList.add('hidden');
+        const entryModal = document.getElementById('contestEntryModal');
+        const createModal = document.getElementById('createContestModal');
+        
+        entryModal.classList.add('hidden');
+        createModal.classList.add('hidden');
         document.body.style.overflow = 'auto';
         
-        // Reset form
+        // Reset forms
         document.getElementById('contestEntryForm').reset();
+        document.getElementById('createContestForm').reset();
         document.getElementById('photoPreview').innerHTML = '';
+        this.resetPrizeFields();
+    }
+
+    showCreateContestModal() {
+        const modal = document.getElementById('createContestModal');
+        
+        // Set default dates
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const nextWeek = new Date(today);
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        
+        document.getElementById('startDate').value = tomorrow.toISOString().split('T')[0];
+        document.getElementById('endDate').value = nextWeek.toISOString().split('T')[0];
+        
+        // Load user clubs for club contests
+        this.loadUserClubs();
+        
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    async loadUserClubs() {
+        const clubSelect = document.getElementById('clubSelect');
+        
+        // TEMP: Use mock clubs for testing
+        const mockClubs = [
+            { id: 1, name: "Street Photography Club" },
+            { id: 2, name: "Portrait Masters" },
+            { id: 3, name: "Nature Photographers" }
+        ];
+        
+        clubSelect.innerHTML = '<option value="">Choose a club...</option>';
+        mockClubs.forEach(club => {
+            const option = document.createElement('option');
+            option.value = club.id;
+            option.textContent = club.name;
+            clubSelect.appendChild(option);
+        });
+    }
+
+    toggleClubSelection(isClubContest) {
+        const clubSelection = document.getElementById('clubSelection');
+        clubSelection.style.display = isClubContest ? 'block' : 'none';
+        
+        if (!isClubContest) {
+            document.getElementById('clubSelect').value = '';
+            document.getElementById('isPublicContest').checked = true;
+        }
+    }
+
+    addPrizeField() {
+        const container = document.getElementById('prizesContainer');
+        const prizeItem = document.createElement('div');
+        prizeItem.className = 'prize-item';
+        prizeItem.innerHTML = `
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Position</label>
+                    <input type="text" name="prize_position[]" placeholder="2nd Place" required>
+                </div>
+                <div class="form-group">
+                    <label>Reward</label>
+                    <input type="text" name="prize_reward[]" placeholder="$250 + Certificate" required>
+                </div>
+                <button type="button" class="btn-icon remove-prize" onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+        container.appendChild(prizeItem);
+    }
+
+    resetPrizeFields() {
+        const container = document.getElementById('prizesContainer');
+        // Keep only the first prize field
+        const firstPrize = container.querySelector('.prize-item');
+        container.innerHTML = '';
+        if (firstPrize) {
+            firstPrize.querySelector('input[name="prize_position[]"]').value = '';
+            firstPrize.querySelector('input[name="prize_reward[]"]').value = '';
+            container.appendChild(firstPrize);
+        }
+    }
+
+    async handleCreateContest(e) {
+        e.preventDefault();
+        
+        try {
+            this.showLoading(true);
+            
+            const formData = new FormData(e.target);
+            
+            // Collect prizes
+            const positions = formData.getAll('prize_position[]');
+            const rewards = formData.getAll('prize_reward[]');
+            const prizes = positions.map((position, index) => ({
+                position: position,
+                reward: rewards[index]
+            })).filter(prize => prize.position && prize.reward);
+            
+            const contestData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                category: formData.get('category'),
+                start_date: formData.get('start_date'),
+                end_date: formData.get('end_date'),
+                entry_fee: parseFloat(formData.get('entry_fee')) || 0,
+                max_entries: parseInt(formData.get('max_entries')),
+                prizes: prizes,
+                club_id: formData.get('contest_type') === 'club' ? formData.get('club_id') : null,
+                is_public: formData.get('contest_type') === 'public' || formData.get('is_public') === 'on'
+            };
+            
+            // Validate dates
+            if (new Date(contestData.start_date) >= new Date(contestData.end_date)) {
+                this.showToast('End date must be after start date', 'error');
+                return;
+            }
+            
+            if (prizes.length === 0) {
+                this.showToast('Please add at least one prize', 'error');
+                return;
+            }
+            
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            this.showToast('Contest created successfully!', 'success');
+            this.closeModal();
+            
+            // Refresh contests list
+            this.loadContests();
+            
+        } catch (error) {
+            console.error('Error creating contest:', error);
+            this.showToast('Failed to create contest', 'error');
+        } finally {
+            this.showLoading(false);
+        }
     }
 
     handlePhotoPreview(e) {

@@ -37,11 +37,21 @@
         <!-- Contest Navigation -->
         <section class="contest-nav">
             <div class="container">
-                <div class="contest-tabs">
-                    <button class="contest-tab active" data-filter="active">Active Contests</button>
-                    <button class="contest-tab" data-filter="upcoming">Upcoming</button>
-                    <button class="contest-tab" data-filter="past">Past Results</button>
-                    <button class="contest-tab" data-filter="my-contests">My Contests</button>
+                <div class="contest-nav-content">
+                    <div class="contest-tabs">
+                        <button class="contest-tab active" data-filter="active">Active Contests</button>
+                        <button class="contest-tab" data-filter="upcoming">Upcoming</button>
+                        <button class="contest-tab" data-filter="past">Past Results</button>
+                        <button class="contest-tab" data-filter="my-contests">My Contests</button>
+                    </div>
+                    <div class="contest-actions">
+                        <button id="createContestBtn" class="btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Create Contest
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -142,6 +152,128 @@
         </div>
     </div>
 
+    <!-- Create Contest Modal -->
+    <div id="createContestModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content contest-modal large-modal">
+            <button class="modal-close">&times;</button>
+            <div class="modal-body">
+                <h2>Create New Contest</h2>
+                
+                <form id="createContestForm" class="create-contest-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contestTitle">Contest Title</label>
+                            <input type="text" id="contestTitle" name="title" maxlength="100" placeholder="Enter contest title" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contestCategory">Category</label>
+                            <select id="contestCategory" name="category" required>
+                                <option value="General">General</option>
+                                <option value="Portrait">Portrait</option>
+                                <option value="Landscape">Landscape</option>
+                                <option value="Street">Street Photography</option>
+                                <option value="Wildlife">Wildlife</option>
+                                <option value="Architecture">Architecture</option>
+                                <option value="Abstract">Abstract</option>
+                                <option value="Black & White">Black & White</option>
+                                <option value="Nature">Nature</option>
+                                <option value="Sports">Sports</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contestDescription">Description</label>
+                        <textarea id="contestDescription" name="description" rows="4" maxlength="1000" placeholder="Describe the contest theme, rules, and what you're looking for..." required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" id="startDate" name="start_date" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="endDate">End Date</label>
+                            <input type="date" id="endDate" name="end_date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="entryFee">Entry Fee ($)</label>
+                            <input type="number" id="entryFee" name="entry_fee" min="0" step="0.01" value="0" placeholder="0.00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="maxEntries">Max Entries per User</label>
+                            <input type="number" id="maxEntries" name="max_entries" min="1" max="10" value="3" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contestType">Contest Type</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="contest_type" value="public" checked>
+                                <span class="radio-custom"></span>
+                                Public Contest (Anyone can enter)
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="contest_type" value="club">
+                                <span class="radio-custom"></span>
+                                Club Contest (Select a club)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="clubSelection" style="display: none;">
+                        <label for="clubSelect">Select Club</label>
+                        <select id="clubSelect" name="club_id">
+                            <option value="">Choose a club...</option>
+                            <!-- Clubs will be loaded dynamically -->
+                        </select>
+                        
+                        <div class="form-group mt-2">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="isPublicContest" name="is_public" checked>
+                                <span class="checkbox-custom"></span>
+                                Allow non-members to view and enter
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Prizes</h3>
+                        <div id="prizesContainer">
+                            <div class="prize-item">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Position</label>
+                                        <input type="text" name="prize_position[]" placeholder="1st Place" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Reward</label>
+                                        <input type="text" name="prize_reward[]" placeholder="$500 + Photography Equipment" required>
+                                    </div>
+                                    <button type="button" class="btn-icon remove-prize" onclick="this.parentElement.parentElement.remove()">×</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="addPrizeBtn" class="btn-secondary">Add Prize</button>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary modal-close">Cancel</button>
+                        <button type="submit" class="btn-primary">Create Contest</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -190,9 +322,8 @@
                 <div class="footer-section">
                     <h4 class="footer-subtitle">Contact</h4>
                     <div class="contact-info">
-                        <p><span class="contact-icon">📧</span> <span class="contact-text">hello@photographyclub.com</span></p>
-                        <p><span class="contact-icon">📞</span> <span class="contact-text">(555) 123-PHOTO</span></p>
-                        <p><span class="contact-icon">📍</span> <span class="contact-text">123 Camera Street<br>Photo City, PC 12345</span></p>
+                        <p><span class="contact-icon">📧</span> <span class="contact-text">lenard@bettencourtphotography.com</span></p>
+                        <p><span class="contact-icon">📍</span> <span class="contact-text">Modesto, CA 95354</span></p>
                     </div>
                 </div>
             </div>

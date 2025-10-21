@@ -200,6 +200,19 @@ class ClubPage {
             this.showAddPhotoModal();
         });
 
+        // Club contest creation
+        document.getElementById('createClubContestBtn')?.addEventListener('click', () => {
+            this.showCreateClubContestModal();
+        });
+
+        document.getElementById('createClubContestForm')?.addEventListener('submit', (e) => {
+            this.handleCreateClubContest(e);
+        });
+
+        document.getElementById('addClubPrizeBtn')?.addEventListener('click', () => {
+            this.addClubPrizeField();
+        });
+
         // Modal events
         document.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -816,8 +829,19 @@ class ClubPage {
     }
 
     closeModal(modal) {
-        modal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            
+            // Reset forms
+            const forms = modal.querySelectorAll('form');
+            forms.forEach(form => form.reset());
+            
+            // Reset club contest prize fields
+            if (modal.id === 'createClubContestModal') {
+                this.resetClubPrizeFields();
+            }
+        }
     }
 
     showPhotoModal(photo) {
@@ -948,6 +972,121 @@ class ClubPage {
     async loadMorePhotos() {
         // Implement pagination for photos
         console.log('Load more photos - to be implemented');
+    }
+
+    // Club Contest Creation Methods
+    showCreateClubContestModal() {
+        const modal = document.getElementById('createClubContestModal');
+        
+        // Set default dates
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const nextWeek = new Date(today);
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        
+        document.getElementById('clubStartDate').value = tomorrow.toISOString().split('T')[0];
+        document.getElementById('clubEndDate').value = nextWeek.toISOString().split('T')[0];
+        
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    addClubPrizeField() {
+        const container = document.getElementById('clubPrizesContainer');
+        const prizeItem = document.createElement('div');
+        prizeItem.className = 'prize-item';
+        prizeItem.innerHTML = `
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Position</label>
+                    <input type="text" name="club_prize_position[]" placeholder="2nd Place" required>
+                </div>
+                <div class="form-group">
+                    <label>Reward</label>
+                    <input type="text" name="club_prize_reward[]" placeholder="$100 + Certificate" required>
+                </div>
+                <button type="button" class="btn-icon remove-prize" onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+        container.appendChild(prizeItem);
+    }
+
+    async handleCreateClubContest(e) {
+        e.preventDefault();
+        
+        try {
+            this.showLoading(true);
+            
+            const formData = new FormData(e.target);
+            
+            // Collect prizes
+            const positions = formData.getAll('club_prize_position[]');
+            const rewards = formData.getAll('club_prize_reward[]');
+            const prizes = positions.map((position, index) => ({
+                position: position,
+                reward: rewards[index]
+            })).filter(prize => prize.position && prize.reward);
+            
+            const contestData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                category: formData.get('category'),
+                start_date: formData.get('start_date'),
+                end_date: formData.get('end_date'),
+                entry_fee: parseFloat(formData.get('entry_fee')) || 0,
+                max_entries: parseInt(formData.get('max_entries')),
+                prizes: prizes,
+                club_id: this.clubId,
+                is_public: formData.get('contest_visibility') === 'public',
+                is_members_only: formData.get('contest_visibility') === 'members',
+                is_private: formData.get('contest_visibility') === 'private'
+            };
+            
+            // Validate dates
+            if (new Date(contestData.start_date) >= new Date(contestData.end_date)) {
+                this.showToast('End date must be after start date', 'error');
+                return;
+            }
+            
+            if (prizes.length === 0) {
+                this.showToast('Please add at least one prize', 'error');
+                return;
+            }
+            
+            // Validate club admin permissions
+            if (!this.userMembership || !['admin', 'owner'].includes(this.userMembership.role)) {
+                this.showToast('Only club admins can create contests', 'error');
+                return;
+            }
+            
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            this.showToast('Club contest created successfully!', 'success');
+            this.closeModal(document.getElementById('createClubContestModal'));
+            
+            // Refresh contests list
+            this.loadClubContests();
+            
+        } catch (error) {
+            console.error('Error creating club contest:', error);
+            this.showToast('Failed to create club contest', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    resetClubPrizeFields() {
+        const container = document.getElementById('clubPrizesContainer');
+        // Keep only the first prize field
+        const firstPrize = container.querySelector('.prize-item');
+        if (firstPrize) {
+            container.innerHTML = '';
+            firstPrize.querySelector('input[name="club_prize_position[]"]').value = '';
+            firstPrize.querySelector('input[name="club_prize_reward[]"]').value = '';
+            container.appendChild(firstPrize);
+        }
     }
 
     escapeHtml(text) {
