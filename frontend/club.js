@@ -28,6 +28,15 @@ class ClubPage {
         // Check authentication
         await this.checkAuthStatus();
         
+        // TEMP: Set dummy user for live server testing
+        this.currentUser = {
+            id: 1,
+            username: 'testuser',
+            displayName: 'Test User',
+            email: 'test@example.com'
+        };
+        this.isAuthenticated = true;
+        
         // Load club data
         await this.loadClub();
         
@@ -54,6 +63,111 @@ class ClubPage {
             console.error('Error checking auth status:', error);
             this.isAuthenticated = false;
         }
+    }
+
+    // TEMP: Mock loadClub method for live server testing
+    async loadClub() {
+        // Mock club data
+        this.club = {
+            id: this.clubId,
+            name: "Sample Photography Club",
+            description: "A demo club for testing the interface",
+            memberCount: 15,
+            photoCount: 30,
+            isPrivate: false,
+            creatorUsername: "testuser",
+            role: "owner"
+        };
+        
+        this.updateClubDisplay();
+        this.loadClubPhotos();
+        this.loadClubMembers();
+    }
+
+    updateClubDisplay() {
+        // Update club header with mock data
+        const clubName = document.querySelector('.club-name');
+        const clubDescription = document.querySelector('.club-description');
+        const memberCount = document.querySelector('.member-count');
+        const photoCount = document.querySelector('.photo-count');
+        
+        if (clubName) clubName.textContent = this.club.name;
+        if (clubDescription) clubDescription.textContent = this.club.description;
+        if (memberCount) memberCount.textContent = `${this.club.memberCount} members`;
+        if (photoCount) photoCount.textContent = `${this.club.photoCount} photos`;
+    }
+
+    loadClubPhotos() {
+        // Mock photos data
+        const mockPhotos = [
+            {
+                id: 1,
+                title: "Club Photo 1",
+                description: "Sample club photo",
+                uploadDate: new Date().toISOString()
+            },
+            {
+                id: 2,
+                title: "Club Photo 2", 
+                description: "Another sample photo",
+                uploadDate: new Date().toISOString()
+            }
+        ];
+        
+        const photosContainer = document.querySelector('.club-photos-grid');
+        if (photosContainer) {
+            photosContainer.innerHTML = mockPhotos.map(photo => this.createPhotoCard(photo)).join('');
+        }
+    }
+
+    loadClubMembers() {
+        // Mock members data
+        const mockMembers = [
+            {
+                id: 1,
+                username: "testuser",
+                displayName: "Test User",
+                role: "owner"
+            },
+            {
+                id: 2,
+                username: "member1",
+                displayName: "Member One",
+                role: "member"
+            }
+        ];
+        
+        const membersContainer = document.querySelector('.club-members-grid');
+        if (membersContainer) {
+            membersContainer.innerHTML = mockMembers.map(member => this.createMemberCard(member)).join('');
+        }
+    }
+
+    createPhotoCard(photo) {
+        const uploadDate = new Date(photo.uploadDate).toLocaleDateString();
+        return `
+            <div class="photo-card" data-photo-id="${photo.id}">
+                <div style="width: 100%; height: 200px; background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">📸</div>
+                <div class="photo-info">
+                    <h4>${photo.title}</h4>
+                    <p>${photo.description}</p>
+                    <span class="photo-date">${uploadDate}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    createMemberCard(member) {
+        return `
+            <div class="member-card" data-member-id="${member.id}">
+                <div class="member-avatar">👤</div>
+                <div class="member-info">
+                    <h4>${member.displayName}</h4>
+                    <p>@${member.username}</p>
+                    <span class="member-role">${member.role}</span>
+                </div>
+            </div>
+        `;
     }
 
     updateUserInterface() {

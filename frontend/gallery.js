@@ -13,14 +13,25 @@ class Dashboard {
     }
 
     async init() {
+        // TEMP: Skip authentication for live server testing
         // Check authentication first
         await this.checkAuthStatus();
         
-        if (!this.isAuthenticated) {
-            // Redirect to login if not authenticated
-            window.location.href = 'index.html';
-            return;
-        }
+        // TEMP: Comment out redirect for live server testing
+        // if (!this.isAuthenticated) {
+        //     // Redirect to login if not authenticated
+        //     window.location.href = 'index.html';
+        //     return;
+        // }
+        
+        // Set dummy user for testing
+        this.currentUser = {
+            id: 1,
+            username: 'testuser',
+            displayName: 'Test User',
+            email: 'test@example.com'
+        };
+        this.isAuthenticated = true;
         
         this.bindEvents();
         this.updateUserProfile();
@@ -476,18 +487,31 @@ class Dashboard {
     // Data Loading Methods
     async loadFeedData() {
         try {
-            // Show loading state
-            const feedGrid = document.querySelector('.feed-grid');
-            if (feedGrid) {
-                feedGrid.innerHTML = '<div class="loading">Loading your feed...</div>';
-            }
-
-            // Load photos from followed users
-            const response = await fetch('/api/photos');
-            if (!response.ok) throw new Error('Failed to fetch feed');
+            // TEMP: Use mock data for live server testing
+            const mockPhotos = [
+                {
+                    id: 1,
+                    title: "Sample Photo 1",
+                    description: "A beautiful landscape photo",
+                    filename: "sample1.jpg",
+                    uploadDate: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    title: "Sample Photo 2", 
+                    description: "An amazing sunset",
+                    filename: "sample2.jpg",
+                    uploadDate: new Date().toISOString()
+                }
+            ];
             
-            const photos = await response.json();
-            this.displayFeedPhotos(photos);
+            this.displayFeedPhotos(mockPhotos);
+            
+            // Original API code (commented for live server testing):
+            // const response = await fetch('/api/photos');
+            // if (!response.ok) throw new Error('Failed to fetch feed');
+            // const photos = await response.json();
+            // this.displayFeedPhotos(photos);
         } catch (error) {
             console.error('Error loading feed:', error);
             const feedGrid = document.querySelector('.feed-grid');
@@ -499,21 +523,44 @@ class Dashboard {
 
     async loadMyContent() {
         try {
-            // Load user's photos
-            const photosResponse = await fetch('/api/photos?user=current');
-            if (photosResponse.ok) {
-                const photos = await photosResponse.json();
-                this.displayMyPhotos(photos);
-                this.updateItemCount('photoCount', photos.length, 'photo');
-            }
-
-            // Load user's videos
-            const videosResponse = await fetch('/api/videos?user=current');
-            if (videosResponse.ok) {
-                const videos = await videosResponse.json();
-                this.displayMyVideos(videos);
-                this.updateItemCount('videoCount', videos.length, 'video');
-            }
+            // TEMP: Use mock data for live server testing
+            const mockPhotos = [
+                {
+                    id: 1,
+                    title: "My Photo 1",
+                    description: "My first upload",
+                    filename: "my-photo1.jpg",
+                    uploadDate: new Date().toISOString()
+                }
+            ];
+            
+            const mockVideos = [
+                {
+                    id: 1,
+                    title: "My Video 1",
+                    url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    uploadDate: new Date().toISOString()
+                }
+            ];
+            
+            this.displayMyPhotos(mockPhotos);
+            this.displayMyVideos(mockVideos);
+            this.updateItemCount('photoCount', mockPhotos.length, 'photo');
+            this.updateItemCount('videoCount', mockVideos.length, 'video');
+            
+            // Original API code (commented for live server testing):
+            // const photosResponse = await fetch('/api/photos?user=current');
+            // if (photosResponse.ok) {
+            //     const photos = await photosResponse.json();
+            //     this.displayMyPhotos(photos);
+            //     this.updateItemCount('photoCount', photos.length, 'photo');
+            // }
+            // const videosResponse = await fetch('/api/videos?user=current');
+            // if (videosResponse.ok) {
+            //     const videos = await videosResponse.json();
+            //     this.displayMyVideos(videos);
+            //     this.updateItemCount('videoCount', videos.length, 'video');
+            // }
         } catch (error) {
             console.error('Error loading user content:', error);
         }
@@ -649,7 +696,7 @@ class Dashboard {
                     </div>
                 </div>
                 <div class="feed-image">
-                    <img src="/uploads/${photo.filename}" alt="${photo.title}" loading="lazy">
+                    <div style="width: 100%; height: 300px; background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">📸</div>
                 </div>
                 <div class="feed-content">
                     <h4>${this.escapeHtml(photo.title)}</h4>
@@ -664,7 +711,7 @@ class Dashboard {
 
         return `
             <div class="media-item photo" data-photo-id="${photo.id}">
-                <img src="/uploads/${photo.thumbnailFilename || photo.filename}" alt="${photo.title}" loading="lazy">
+                <div style="width: 100%; height: 200px; background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">📸</div>
                 <div class="media-overlay">
                     <div class="media-title">${this.escapeHtml(photo.title)}</div>
                     <div class="media-date">${uploadDate}</div>
@@ -777,16 +824,32 @@ class Dashboard {
 
     async loadMyClubs() {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/clubs/user/${this.currentUser.id}`, {
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                const clubs = await response.json();
-                this.displayMyClubs(clubs);
-            } else {
-                this.showToast('Failed to load your clubs', 'error');
-            }
+            // TEMP: Use mock data for live server testing
+            const mockClubs = [
+                {
+                    id: 1,
+                    name: "Landscape Photography Club",
+                    description: "For lovers of landscape photography",
+                    memberCount: 15,
+                    photoCount: 45,
+                    creatorDisplayName: "Test User",
+                    role: "owner",
+                    isPrivate: false
+                }
+            ];
+            
+            this.displayMyClubs(mockClubs);
+            
+            // Original API code (commented for live server testing):
+            // const response = await fetch(`${this.apiBaseUrl}/clubs/user/${this.currentUser.id}`, {
+            //     credentials: 'include'
+            // });
+            // if (response.ok) {
+            //     const clubs = await response.json();
+            //     this.displayMyClubs(clubs);
+            // } else {
+            //     this.showToast('Failed to load your clubs', 'error');
+            // }
         } catch (error) {
             console.error('Error loading my clubs:', error);
             this.showToast('Failed to load your clubs', 'error');
@@ -795,16 +858,40 @@ class Dashboard {
 
     async loadDiscoverClubs() {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/clubs`, {
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                const clubs = await response.json();
-                this.displayDiscoverClubs(clubs);
-            } else {
-                this.showToast('Failed to load clubs', 'error');
-            }
+            // TEMP: Use mock data for live server testing
+            const mockClubs = [
+                {
+                    id: 2,
+                    name: "Street Photography",
+                    description: "Urban photography enthusiasts",
+                    memberCount: 28,
+                    photoCount: 120,
+                    creatorDisplayName: "Street Photographer",
+                    isPrivate: false
+                },
+                {
+                    id: 3,
+                    name: "Portrait Masters",
+                    description: "Professional portrait photography",
+                    memberCount: 42,
+                    photoCount: 89,
+                    creatorDisplayName: "Portrait Pro",
+                    isPrivate: true
+                }
+            ];
+            
+            this.displayDiscoverClubs(mockClubs);
+            
+            // Original API code (commented for live server testing):
+            // const response = await fetch(`${this.apiBaseUrl}/clubs`, {
+            //     credentials: 'include'
+            // });
+            // if (response.ok) {
+            //     const clubs = await response.json();
+            //     this.displayDiscoverClubs(clubs);
+            // } else {
+            //     this.showToast('Failed to load clubs', 'error');
+            // }
         } catch (error) {
             console.error('Error loading discover clubs:', error);
             this.showToast('Failed to load clubs', 'error');
