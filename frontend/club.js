@@ -906,7 +906,7 @@ class ClubPage {
 
             if (result.success) {
                 this.showToast(result.message, 'success');
-                setTimeout(() => window.location.href = 'gallery.html', 2000);
+                setTimeout(() => window.location.href = 'user-dashboard.html', 2000);
             } else {
                 this.showToast(result.error || 'Failed to delete club', 'error');
             }

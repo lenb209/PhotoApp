@@ -363,7 +363,7 @@ class PhotoShareLanding {
             
             // Redirect to gallery after successful signup
             setTimeout(() => {
-                window.location.href = 'gallery.html';
+                window.location.href = 'user-dashboard.html';
             }, 2000);
             
         } catch (error) {
@@ -461,7 +461,7 @@ class PhotoShareLanding {
             
             // Redirect to gallery after successful login
             setTimeout(() => {
-                window.location.href = 'gallery.html';
+                window.location.href = 'user-dashboard.html';
             }, 1500);
             
         } catch (error) {
@@ -836,7 +836,7 @@ class PhotoShareLanding {
                 
                 // Scroll to gallery or redirect
                 setTimeout(() => {
-                    window.location.href = 'gallery.html';
+                    window.location.href = 'user-dashboard.html';
                 }, 1500);
             } else {
                 this.showToast(result.message || 'Registration failed', 'error');
@@ -883,7 +883,7 @@ class PhotoShareLanding {
                 
                 // Redirect to gallery
                 setTimeout(() => {
-                    window.location.href = 'gallery.html';
+                    window.location.href = 'user-dashboard.html';
                 }, 1500);
             } else {
                 this.showToast(result.message || 'Login failed', 'error');

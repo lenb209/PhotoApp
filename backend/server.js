@@ -58,7 +58,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/gallery', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/gallery.html'));
+  res.sendFile(path.join(__dirname, '../frontend/user-dashboard.html'));
+});
+
+app.get('/user-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/user-dashboard.html'));
 });
 
 app.get('/club', (req, res) => {
