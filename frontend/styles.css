@@ -1500,7 +1500,3 @@ input[type="text"]:focus, textarea:focus, input[type="email"]:focus, input[type=
     color: var(--text-secondary);
     font-size: 0.9rem;
 }
-    .footer-links {
-        align-items: center;
-    }
-}
